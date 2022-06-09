@@ -1,8 +1,4 @@
-import { AxiosError, AxiosInstance, AxiosRequestConfig } from 'axios';
-
-export interface UseCachingInterceptorOptions {
-  ttl?: number;
-}
+import { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
 export interface AdvancedHttpClientOptions {
   logger?: Logger;
@@ -34,6 +30,14 @@ export type JSONArray = (JSONObject | JSONArray | JSONPrimitive)[];
 export type JSONObject = {
   [key: string]: JSONObject | JSONPrimitive | JSONArray;
 };
+
+export interface UseCachingInterceptorOptions {
+  cacheItemTimeToLive?: number;
+  generateCacheKey?: (requestConfig: AxiosRequestConfigWithMetadata) => string;
+  shouldCache?: (respose: AxiosResponse<unknown, any>) => boolean;
+  cacheStatusCodeRanges?: [HttpStatusCode, HttpStatusCode][];
+  supportedMethodsForCaching?: HttpMethod[];
+}
 
 export interface UseRetryInterceptorOptions {
   maxRetryAttempts?: number;

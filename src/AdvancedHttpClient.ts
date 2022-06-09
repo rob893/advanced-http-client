@@ -39,6 +39,7 @@ export class AdvancedHttpClient {
         correlationIdHeaderName: DefaultHeader.CorrelationId
       },
       useGetNotFoundReturnNull = true,
+      useCachingOptions: { cacheItemTimeToLive = 300000 } = {},
       useCaching = true
     } = options ?? {};
 
@@ -60,28 +61,33 @@ export class AdvancedHttpClient {
 
     this.cacheInFlightRequests = cacheInFlightRequests;
 
-    if (useCorrelationId) {
-      useCorrelationIdInterceptor(this.httpClient, useCorrelationIdOptions, this.logger);
+    if (useLogging) {
+      useLoggingInterceptor(this.httpClient, this.logger);
     }
 
-    if (useGetNotFoundReturnNull) {
-      useGetNotFoundNullInterceptor(this.httpClient, this.logger);
+    if (useCaching) {
+      useCachingInterceptor(
+        this.httpClient,
+        new LRUCache({ entryExpirationTimeInMS: cacheItemTimeToLive }),
+        undefined,
+        this.logger
+      );
     }
 
     if (cacheInFlightRequests) {
       useInProgressCachingInterceptor(this.httpClient, this.inProgressRequestMap, undefined, this.logger);
     }
 
-    if (useCaching) {
-      useCachingInterceptor(this.httpClient, new LRUCache(), undefined, this.logger);
+    if (useGetNotFoundReturnNull) {
+      useGetNotFoundNullInterceptor(this.httpClient, this.logger);
+    }
+
+    if (useCorrelationId) {
+      useCorrelationIdInterceptor(this.httpClient, useCorrelationIdOptions, this.logger);
     }
 
     if (useRetry) {
       useRetryInterceptor(this.httpClient, useRetryOptions, this.logger);
-    }
-
-    if (useLogging) {
-      useLoggingInterceptor(this.httpClient, this.logger);
     }
   }
 
